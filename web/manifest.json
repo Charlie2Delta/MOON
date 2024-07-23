@@ -1,6 +1,6 @@
 {
-    "name": "testgit",
-    "short_name": "testgit",
+    "name": "namer_app",
+    "short_name": "namer_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

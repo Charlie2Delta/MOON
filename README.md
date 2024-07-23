@@ -1,12 +1,14 @@
-# testgit
+# MOON
 
 A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project is a validating point of the MOON project.
+The objective is to validate the path between the NFC chip, the contract and the wallet.
 
-A few resources to get you started if this is your first Flutter project:
+
+A few resources to get started :
 
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
