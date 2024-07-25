@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
+import 'app_state.dart';
+import 'generator_page.dart';
+import 'uids_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,22 +27,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var uids = <String>[]; // List to store UIDs
-
-  void addUid(String uid) {
-    if (!uids.contains(uid)){
-      uids.add(uid);
-    }
-    notifyListeners();
-  }
-
-  void clearUids() {
-    uids.clear();
-    notifyListeners();
-  }
-}
-
 class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -56,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
       case 0:
         page = GeneratorPage();
       case 1:
-        page = UIDsPage(); // Add UIDsPage as a case
+        page = UIDsPage();
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
@@ -75,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.nfc),
-                    label: Text('UIDs'), // Add NFC logo for UIDsPage
+                    label: Text('UIDs'),
                   ),
                 ],
                 selectedIndex: selectedIndex,
@@ -96,106 +82,5 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     });
-  }
-}
-
-class GeneratorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                // Start polling for NFC tag
-                NFCTag tag = await FlutterNfcKit.poll();
-
-                // Retrieve detailed information about the tag
-                String tagDetails = '''
-                  UID: ${tag.id}
-                  Standard: ${tag.standard}
-                  ''';// Print the details of the NFC tag
-                print(tagDetails); // Save UID to the app state
-                appState.addUid(tag.id); // Display the details in a dialog
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('NFC Tag Details'),
-                      content: SingleChildScrollView(
-                        child: Text(tagDetails),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text('OK'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ).then((_) async {
-                  // Ensure the NFC session is properly closed
-                  await FlutterNfcKit.finish();
-                });
-              } catch (e) {
-                print('Error reading NFC tag: $e');
-                // Ensure the NFC session is properly closed in case of an error
-                await FlutterNfcKit.finish();
-              }
-            },
-            child: Text('Read NFC Tag'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class UIDsPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (appState.uids.isEmpty)
-          Center(
-            child: Text('No UIDs yet.'),
-          )
-        else
-          Expanded(
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text('UIDs of tapped NFC tags:'),
-                ),
-                for (var uid in appState.uids)
-                  ListTile(
-                    leading: Icon(Icons.nfc),
-                    title: Text(uid),
-                  ),
-              ],
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: ElevatedButton(
-            onPressed: () {
-              appState.clearUids();
-            },
-            child: Text('Clear UIDs'),
-          ),
-        ),
-      ],
-    );
   }
 }
